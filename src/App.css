@@ -16,6 +16,10 @@ font-family: 'Dancing Script', cursive;
 font-family: 'Noto Sans', sans-serif;
 */
 
+.displaycontents{
+  display: contents;
+}
+
 :root{
   /* --color1: 254, 245, 237;
   --color2: 211, 228, 205;

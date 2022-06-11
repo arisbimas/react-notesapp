@@ -11,14 +11,25 @@ export default function CreateNote() {
 
     let userID = localStorage.getItem("UserID");
 
+    useEffect(() => {
+        let noteDetail = localStorage.getItem('note-detail');
+        // setUserNoteData(
+        //     snapshot.docs.map((doc) => ({
+        //         id: doc.id,
+        //         data: doc.data(),
+        //     }))
+        // );
+        console.log(noteDetail);
+    }, []);
+
     const submit = (e) => {
         e.preventDefault();
         db.collection("DataNotes").doc(userID).collection("Notes").add({
             title: noteTitle,
             note: noteDesc,
         });
-        // setNoteTitle("");
-        // setNoteDesc("");
+        setNoteTitle("");
+        setNoteDesc("");
     };
 
     const boxBorder = {
