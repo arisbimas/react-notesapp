@@ -1,0 +1,124 @@
+/* 
+#fef5ed
+#d3e4cd
+#adc2a9
+#99a799
+
+#F5E8C7
+#DEBA9D
+#9E7777
+#704D5C
+
+*/
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans&family=Handlee&family=Neucha&family=Caveat+Brush&display=swap');
+/* 
+font-family: 'Dancing Script', cursive;
+font-family: 'Noto Sans', sans-serif;
+*/
+
+:root{
+  /* --color1: 254, 245, 237;
+  --color2: 211, 228, 205;
+  --color3: 173, 194, 169;
+  --color4: 153, 167, 153; */
+  
+  /* --color1: #F5E8C7;
+  --color2: #DEBA9D;
+  --color3: #9E7777;
+  --color4: #704D5C; */
+}
+
+/* body{
+  background-color: var(--color1);
+}
+
+.header{
+  background-color: var(--color4);
+  z-index: 1;
+}
+
+.header-content{
+  margin: auto;
+  padding: 32px 44px;
+}
+
+.header-content-left > a{
+  font-family: 'Dancing Script', cursive;
+  font-size: xx-large;
+  color: var(--color1);
+  position: relative;
+  top: 4px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+}
+
+.header-content-right{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+nav{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+nav a{
+  padding: 10px;
+  color: var(--color1);
+  margin: 0 10px 0 10px;
+}
+
+a{
+  text-decoration: none;
+}
+
+.bgHover{
+  border-radius: 5%;
+  
+}
+
+.bgHover:hover{
+  background-color: var(--color3);
+} */
+
+/* .App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} */
