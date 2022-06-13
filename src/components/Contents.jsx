@@ -10,16 +10,22 @@ import ListNote from './ListNote'
 
 export default function Contents() {
 
-    const [noteDetail, setNoteDetail] = useState({});
-    const [noteId, setNoteId] = useState("");
-    const [noteTitle, setNoteTitle] = useState("");
-    const [noteDesc, setNoteDesc] = useState("");
-    const [noteBg, setNoteBg] = useState("brand.400");
-    const toast = useToast();
+    const initState = {
+        title: "",
+        note: "",
+        bg: "brand.400"
+    }
+    const [noteData, setNoteData] = useState(initState);
+    const [currentNoteId, setCurrentNoteId] = useState("");
     const [isOpenPelette, setOpenPelette] = useState(false);
     const [isLoading, setLoading] = useState(false);
+    const toast = useToast();
 
     let userID = localStorage.getItem("UserID");
+
+    const clearState = () => {
+        setNoteData({ ...initState });
+    };
 
     const msgAlert = (status, msgTitle, msgDesc) => {
         toast({
@@ -35,18 +41,16 @@ export default function Contents() {
         e.preventDefault();
         setLoading(true);
         try {
-            if (noteId) {
-                db.collection("DataNotes").doc(userID).collection("Notes").doc(noteId).update({
-                    title: noteTitle,
-                    note: noteDesc,
-                    bg: noteBg
+            if (currentNoteId) {
+                db.collection("DataNotes").doc(userID).collection("Notes").doc(currentNoteId).update({
+                    title: noteData.title,
+                    note: noteData.note,
+                    bg: noteData.bg
                 })
                     .then(() => {
                         msgAlert('success', 'Success', 'Data Saved');
-                        setNoteTitle("");
-                        setNoteDesc("");
-                        setNoteId("");
-                        setNoteBg("brand.400");
+                        clearState();
+                        setCurrentNoteId("");
                         setLoading(false);
                     })
                     .catch((error) => {
@@ -54,16 +58,14 @@ export default function Contents() {
                     })
             } else {
                 db.collection("DataNotes").doc(userID).collection("Notes").add({
-                    title: noteTitle,
-                    note: noteDesc,
-                    bg: noteBg
+                    title: noteData.title,
+                    note: noteData.note,
+                    bg: noteData.bg
                 })
                     .then(() => {
                         msgAlert('success', 'Success', 'Data Saved');
-                        setNoteTitle("");
-                        setNoteDesc("");
-                        setNoteId("");
-                        setNoteBg("brand.400");
+                        setCurrentNoteId("");
+                        clearState(); 
                         setLoading(false);
                     })
                     .catch((error) => {
@@ -78,11 +80,12 @@ export default function Contents() {
 
     const onGetDataById = (datas) => {
         let newData = datas.data;
-        setNoteDetail(newData);
-        setNoteId(datas.id);
-        setNoteTitle(newData.title);
-        setNoteDesc(newData.note);
-        setNoteBg(newData.bg);
+        setNoteData({
+            title: newData.title,
+            note: newData.note,
+            bg: newData.bg
+        })
+        setCurrentNoteId(datas.id);
     }
 
     const openPalette = () => {
@@ -94,11 +97,11 @@ export default function Contents() {
     }
 
     const hanldeChangeBg = (color) => {
-        setNoteBg(color.hex)
+        setNoteData({ ...noteData, bg: color.hex })
     }
 
     const hanldeChangeComplateBg = (color) => {
-        setNoteBg(color.hex)
+        setNoteData({ ...noteData, bg: color.hex })
     }
 
     //style
@@ -132,7 +135,7 @@ export default function Contents() {
                     borderTopLeftRadius={'12px'}
                     className='create'
                     fontFamily="Handlee"
-                    bg={noteBg} >
+                    bg={noteData.bg} >
                     <Textarea
                         resize="vertical"
                         size="lg"
@@ -141,8 +144,9 @@ export default function Contents() {
                         //color="brand.400"
                         color="black"
                         placeholder='Title...'
-                        value={noteTitle}
-                        onChange={(e) => setNoteTitle(e.target.value)} />
+                        required="true"
+                        value={noteData.title}
+                        onChange={(e) => setNoteData({ ...noteData, title: e.target.value })} />
 
                     <Textarea
                         resize="vertical"
@@ -153,8 +157,9 @@ export default function Contents() {
                         _focus={{ outline: 'none' }}
                         rows='10'
                         placeholder='Notes...'
-                        value={noteDesc}
-                        onChange={(e) => setNoteDesc(e.target.value)} />
+                        required="true"
+                        value={noteData.note}
+                        onChange={(e) => setNoteData({ ...noteData, note: e.target.value })} />
                 </Box>
                 <Box
                     display={"flex"}
@@ -170,9 +175,7 @@ export default function Contents() {
                         </Tooltip>
                         <Tooltip hasArrow label='Cancel'>
                             <Button colorScheme='brand' variant='solid' border={'1px dashed'} onClick={() => {
-                                setNoteTitle("");
-                                setNoteDesc("");
-                                setNoteDetail("");
+                                clearState(); 
                             }}>
                                 Cancel
                             </Button>
@@ -186,7 +189,7 @@ export default function Contents() {
                             {isOpenPelette ? <Box sx={popover} pos={{ sm: "relative", md: "absolute" }}>
                                 <Box sx={cover} onClick={closePalette} />
                                 <SketchPicker
-                                    color={noteBg}
+                                    color={noteData.ng}
                                     onChangeComplete={hanldeChangeComplateBg}
                                     onChange={hanldeChangeBg} />
                             </Box> : null}
@@ -196,10 +199,6 @@ export default function Contents() {
             </Box>
 
             <ListNote onSelectNote={(value) => onGetDataById(value)} />
-
-            {/* <CreateNote/>
-                <Spacer />
-                <ListNote/> */}
         </Box >
     )
 

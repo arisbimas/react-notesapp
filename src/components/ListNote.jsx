@@ -163,11 +163,11 @@ export default function ListNote({ onSelectNote }) {
                                                     }
 
                                                 }}>
-                                                <Text className='noteTitle' pb={3} pr={10} fontWeight="bold">
+                                                <Text className='noteTitle' pb={3} pr={10} fontWeight="bold" minH={9}>
                                                     {data.title}
                                                 </Text>
                                                 <Divider />
-                                                <Box className='noteDesc' pt={3}>
+                                                <Box className='noteDesc' pt={3} minH={20}>
                                                     {data.note}
                                                 </Box>
                                             </Box>
