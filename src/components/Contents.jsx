@@ -2,6 +2,7 @@ import React, { Component, useEffect, useState } from 'react'
 import { Box, Textarea, Button, Tooltip, useToast } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPalette } from '@fortawesome/free-solid-svg-icons'
+import { SketchPicker, ChromePicker } from 'react-color';
 
 import db from "../services/firestore";
 import ListNote from './ListNote'
@@ -13,7 +14,10 @@ export default function Contents() {
     const [noteId, setNoteId] = useState("");
     const [noteTitle, setNoteTitle] = useState("");
     const [noteDesc, setNoteDesc] = useState("");
-    const toast = useToast()
+    const [noteBg, setNoteBg] = useState("brand.400");
+    const toast = useToast();
+    const [isOpenPelette, setOpenPelette] = useState(false);
+
 
     let userID = localStorage.getItem("UserID");
 
@@ -34,12 +38,14 @@ export default function Contents() {
                 db.collection("DataNotes").doc(userID).collection("Notes").doc(noteId).update({
                     title: noteTitle,
                     note: noteDesc,
+                    bg: noteBg
                 })
                     .then(() => {
                         msgAlert('success', 'Success', 'Data Saved');
                         setNoteTitle("");
                         setNoteDesc("");
                         setNoteId("");
+                        setNoteBg("brand.400");
                     })
                     .catch((error) => {
                         msgAlert('error', 'error', error);
@@ -48,12 +54,14 @@ export default function Contents() {
                 db.collection("DataNotes").doc(userID).collection("Notes").add({
                     title: noteTitle,
                     note: noteDesc,
+                    bg: noteBg
                 })
                     .then(() => {
                         msgAlert('success', 'Success', 'Data Saved');
                         setNoteTitle("");
                         setNoteDesc("");
                         setNoteId("");
+                        setNoteBg("brand.400");
                     })
                     .catch((error) => {
                         msgAlert('error', 'error', error);
@@ -73,26 +81,83 @@ export default function Contents() {
         setNoteDesc(newData.note);
     }
 
+    const openPalette = () => {
+        setOpenPelette(true)
+    }
+
+    const closePalette = () => {
+        setOpenPelette(false)
+    }
+
+    const hanldeChangeBg = (color) => {
+        setNoteBg(color.hex)
+    }
+
+    const hanldeChangeComplateBg = (color) => {
+        setNoteBg(color.hex)
+    }
+
     //style
     const boxBorder = {
         border: '1px dashed',
         borderColor: 'brand.50',
-        borderRadius: '12px',
         padding: '0.75rem'
+    }
+
+    const popover = {
+        position: 'absolute',
+        zIndex: '2',
+    }
+    const cover = {
+        position: 'fixed',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        left: '0px',
     }
 
     return (
         <Box p={4} pt={125} display={{ md: 'flex' }} h={'max-content'}>
-            <Box sx={boxBorder} className='create' w={{ md: '35%' }} h={'max-content'} fontFamily="Handlee" >
-                <Textarea resize="vertical" size="lg" placeholder='Title...' border={0} _focus={{ outline: 'none' }} color="brand.400"
-                    value={noteTitle}
-                    onChange={(e) => setNoteTitle(e.target.value)} />
+            <Box
+                display={"inline-block"}
+                w={{ sm: '100%', md: '50%', lg: '35%' }}
+                h={'max-content'}>
+                <Box
+                    sx={boxBorder}
+                    borderTopRightRadius={'12px'}
+                    borderTopLeftRadius={'12px'}
+                    className='create'
+                    fontFamily="Handlee"
+                    bg={noteBg} >
+                    <Textarea
+                        resize="vertical"
+                        size="lg"
+                        border={0}
+                        _focus={{ outline: 'none' }}
+                        //color="brand.400"
+                        color="black"
+                        placeholder='Title...'
+                        value={noteTitle}
+                        onChange={(e) => setNoteTitle(e.target.value)} />
 
-                <Textarea resize="vertical" size="lg" placeholder='Notes...' border={0} _focus={{ outline: 'none' }} rows='10' color="brand.400"
-                    value={noteDesc}
-                    onChange={(e) => setNoteDesc(e.target.value)} />
-
-                <Box display={"flex"} justifyContent={'space-between'} mt="10">
+                    <Textarea
+                        resize="vertical"
+                        size="lg"
+                        border={0}
+                        //color="brand.400"
+                        color="black"
+                        _focus={{ outline: 'none' }}
+                        rows='10'
+                        placeholder='Notes...'
+                        value={noteDesc}
+                        onChange={(e) => setNoteDesc(e.target.value)} />
+                </Box>
+                <Box
+                    display={"flex"}
+                    justifyContent={'space-between'}
+                    sx={boxBorder}
+                    borderBottomRightRadius={'12px'}
+                    borderBottomLeftRadius={'12px'}>
                     <Box>
                         <Tooltip hasArrow label='Save Note'>
                             <Button colorScheme='brand' variant='outline' border={'1px dashed'} onClick={submit} mr={1}>
@@ -109,10 +174,19 @@ export default function Contents() {
                             </Button>
                         </Tooltip>
                     </Box>
-                    <Tooltip hasArrow label='Choose color backgound note'>
-                        <Button colorScheme='brand' variant='outline' border={'1px dashed'}>
-                            <FontAwesomeIcon icon={faPalette} />
-                        </Button>
+                    <Tooltip hasArrow label='Choose background color'>
+                        <Box>
+                            <Button colorScheme='brand' variant='outline' border={'1px dashed'} onClick={openPalette}>
+                                <FontAwesomeIcon icon={faPalette} />
+                            </Button>
+                            {isOpenPelette ? <Box sx={popover}>
+                                <Box sx={cover} onClick={closePalette} />
+                                <SketchPicker
+                                    color={noteBg}
+                                    onChangeComplete={hanldeChangeComplateBg}
+                                    onChange={hanldeChangeBg} />
+                            </Box> : null}
+                        </Box>
                     </Tooltip>
                 </Box>
             </Box>
@@ -122,7 +196,7 @@ export default function Contents() {
             {/* <CreateNote/>
                 <Spacer />
                 <ListNote/> */}
-        </Box>
+        </Box >
     )
 
 }

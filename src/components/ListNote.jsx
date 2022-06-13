@@ -127,7 +127,7 @@ export default function ListNote({ onCounterChange }) {
                                             sx={box}
                                             w={["100%", "50%", "50%", "30%"]}
                                             mt={['10px', '0px']}
-                                            bg={useColorModeValue('white', 'gray.800')}
+                                            bg={useColorModeValue(data.bg, data.bg)}
                                             boxShadow={'xl'}
                                             pos="relative">
                                             <Button colorScheme='brand' variant='outline' border={'none'} pos={"absolute"} top={1} right={1}
