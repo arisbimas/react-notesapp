@@ -3,11 +3,17 @@ import './App.css';
 import { Header } from "./components/Header";
 import Contents from './components/Contents';
 import React, { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 
 export default class App extends Component {
 
   componentDidMount() {
-    localStorage.setItem("UserID", "2a5uKXBKJ0iloCR1jrYc");
+    let currentUID = localStorage.getItem("UserID");
+    if (!currentUID) {
+      localStorage.setItem("UserID", uuidv4());
+    }
+
     localStorage.setItem("note-detail", "");
   }
 

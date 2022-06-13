@@ -1,5 +1,5 @@
 import React, { Component, useEffect, useState } from 'react'
-import { Box, Textarea, Button, Tooltip } from '@chakra-ui/react'
+import { Box, Textarea, Button, Tooltip, useToast } from '@chakra-ui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPalette } from '@fortawesome/free-solid-svg-icons'
 
@@ -13,25 +13,56 @@ export default function Contents() {
     const [noteId, setNoteId] = useState("");
     const [noteTitle, setNoteTitle] = useState("");
     const [noteDesc, setNoteDesc] = useState("");
+    const toast = useToast()
 
     let userID = localStorage.getItem("UserID");
 
+    const msgAlert = (status, msgTitle, msgDesc) => {
+        toast({
+            title: msgTitle,
+            description: msgDesc,
+            status: status,
+            duration: 9000,
+            isClosable: true,
+        })
+    }
+
     const submit = (e) => {
         e.preventDefault();
-        if (noteId) {
-            db.collection("DataNotes").doc(userID).collection("Notes").doc(noteId).update({
-                title: noteTitle,
-                note: noteDesc,
-            });
-        } else {
-            db.collection("DataNotes").doc(userID).collection("Notes").add({
-                title: noteTitle,
-                note: noteDesc,
-            });
+        try {
+            if (noteId) {
+                db.collection("DataNotes").doc(userID).collection("Notes").doc(noteId).update({
+                    title: noteTitle,
+                    note: noteDesc,
+                })
+                    .then(() => {
+                        msgAlert('success', 'Success', 'Data Saved');
+                        setNoteTitle("");
+                        setNoteDesc("");
+                        setNoteId("");
+                    })
+                    .catch((error) => {
+                        msgAlert('error', 'error', error);
+                    })
+            } else {
+                db.collection("DataNotes").doc(userID).collection("Notes").add({
+                    title: noteTitle,
+                    note: noteDesc,
+                })
+                    .then(() => {
+                        msgAlert('success', 'Success', 'Data Saved');
+                        setNoteTitle("");
+                        setNoteDesc("");
+                        setNoteId("");
+                    })
+                    .catch((error) => {
+                        msgAlert('error', 'error', error);
+                    });
+            }
+        } catch (error) {
+            msgAlert('error', 'error', 'error');
         }
-        setNoteTitle("");
-        setNoteDesc("");
-        setNoteId("");
+
     };
 
     const onGetDataById = (datas) => {
@@ -69,7 +100,7 @@ export default function Contents() {
                             </Button>
                         </Tooltip>
                         <Tooltip hasArrow label='Cancel'>
-                            <Button colorScheme='brand' variant='solid' border={'1px dashed'} onClick={()=>{
+                            <Button colorScheme='brand' variant='solid' border={'1px dashed'} onClick={() => {
                                 setNoteTitle("");
                                 setNoteDesc("");
                                 setNoteDetail("");

@@ -4,25 +4,29 @@ import {
     Text,
     useColorModeValue,
     Divider,
-    Flex,
-    Tooltip,
     Img,
     Center,
     Button,
     ScaleFade,
+    useToast
 } from '@chakra-ui/react';
 import ImgNoData from '../assets/nodata.svg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import db from "../services/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 
 export default function ListNote({ onCounterChange }) {
 
     const [userNoteData, setUserNoteData] = useState([]);
     const [counter, setCounter] = useState(0);
-    const [isLoading, setLoading] = useState(false)
+    const [isLoading, setLoading] = useState(false);
+    const toast = useToast()
+
 
     let userID = localStorage.getItem("UserID");
+    // const noteRef = doc(db, 'DataNotes', userID, "Notes");
+
     useEffect(() => {
         setLoading(true);
         db.collection("DataNotes/" + userID + "/Notes").onSnapshot((snapshot) => {
@@ -36,6 +40,26 @@ export default function ListNote({ onCounterChange }) {
         });
         console.log({ userNoteData });
     }, []);
+
+    const handleDeleteNote = async (data) => {
+        await deleteDoc(doc(db, 'DataNotes', userID, "Notes", data))
+        .then(() => {
+            msgAlert('success', 'Success', 'Data Deleted');
+        })
+        .catch((error) => {
+            msgAlert('error', 'error', error);
+        })
+    }
+
+    const msgAlert = (status, msgTitle, msgDesc) => {
+        toast({
+            title: msgTitle,
+            description: msgDesc,
+            status: status,
+            duration: 9000,
+            isClosable: true,
+        })
+    }
 
 
     const container = {
@@ -98,20 +122,16 @@ export default function ListNote({ onCounterChange }) {
                         <ScaleFade initialScale={0.9} in={!isLoading} className="displaycontents">
                             {
                                 userNoteData.length > 0 ? userNoteData.map(({ id, data }) => (
-                                    <Box display={"contents"}>
+                                    <Box display={"contents"} key={id}>
                                         <Box
-                                            key={id}
                                             sx={box}
                                             w={["100%", "50%", "50%", "30%"]}
                                             mt={['10px', '0px']}
                                             bg={useColorModeValue('white', 'gray.800')}
                                             boxShadow={'xl'}
-                                            pos="relative"
-                                        >
+                                            pos="relative">
                                             <Button colorScheme='brand' variant='outline' border={'none'} pos={"absolute"} top={1} right={1}
-                                            onClick={()=>{
-                                                alert('delete on develop')
-                                            }}>
+                                                onClick={() => handleDeleteNote(id)}>
                                                 <FontAwesomeIcon icon={faTrash} />
                                             </Button>
                                             <Box
