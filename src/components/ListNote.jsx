@@ -8,7 +8,10 @@ import {
     Center,
     Button,
     ScaleFade,
-    useToast
+    useToast,
+    Stack,
+    Skeleton,
+    SimpleGrid
 } from '@chakra-ui/react';
 import ImgNoData from '../assets/nodata.svg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -16,7 +19,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import db from "../services/firestore";
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 
-export default function ListNote({ onCounterChange }) {
+export default function ListNote({ onSelectNote }) {
 
     const [userNoteData, setUserNoteData] = useState([]);
     const [counter, setCounter] = useState(0);
@@ -43,12 +46,12 @@ export default function ListNote({ onCounterChange }) {
 
     const handleDeleteNote = async (data) => {
         await deleteDoc(doc(db, 'DataNotes', userID, "Notes", data))
-        .then(() => {
-            msgAlert('success', 'Success', 'Data Deleted');
-        })
-        .catch((error) => {
-            msgAlert('error', 'error', error);
-        })
+            .then(() => {
+                msgAlert('success', 'Success', 'Data Deleted');
+            })
+            .catch((error) => {
+                msgAlert('error', 'error', error);
+            })
     }
 
     const msgAlert = (status, msgTitle, msgDesc) => {
@@ -115,9 +118,20 @@ export default function ListNote({ onCounterChange }) {
             <Box sx={container} className='listNote'>
                 {
                     isLoading ?
-                        <Center><Text className='noteTitle' pb={3} pr={9} fontWeight="bold">
-                            Loadinggg...
-                        </Text></Center>
+                        // <Center><Text className='noteTitle' pb={3} pr={9} fontWeight="bold">
+                        //     Loadinggg...
+                        // </Text></Center>
+                        <SimpleGrid columns={2} spacing={10} w="100%">
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                            <Skeleton color="black" height='50px' />
+                        </SimpleGrid>
                         :
                         <ScaleFade initialScale={0.9} in={!isLoading} className="displaycontents">
                             {
@@ -130,7 +144,13 @@ export default function ListNote({ onCounterChange }) {
                                             bg={useColorModeValue(data.bg, data.bg)}
                                             boxShadow={'xl'}
                                             pos="relative">
-                                            <Button colorScheme='brand' variant='outline' border={'none'} pos={"absolute"} top={1} right={1}
+                                            <Button
+                                                colorScheme='brand'
+                                                variant='outline'
+                                                border={'none'}
+                                                pos={"absolute"}
+                                                top={1}
+                                                right={1}
                                                 onClick={() => handleDeleteNote(id)}>
                                                 <FontAwesomeIcon icon={faTrash} />
                                             </Button>
@@ -138,11 +158,8 @@ export default function ListNote({ onCounterChange }) {
                                                 onClick={() => {
                                                     let dataNoteDetail = userNoteData.filter(x => x.id == `${id}`);
                                                     if (dataNoteDetail.length >= 0) {
-                                                        // console.log({ dataNoteDetail });
-                                                        // localStorage.setItem("note-detail", JSON.stringify(dataNoteDetail[0]));
-                                                        onCounterChange(dataNoteDetail[0])
+                                                        onSelectNote(dataNoteDetail[0])
                                                     } else {
-
                                                     }
 
                                                 }}>

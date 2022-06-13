@@ -19,7 +19,7 @@ export function Header() {
                 <Flex h={28} alignItems={'center'} justifyContent={'space-between'}>
                     <Box>
                         <Heading as="a" href='#' size='md' fontFamily="Dancing Script" fontSize="3xl">
-                            <Img src={ImgBrand} maxW={["20%","14%"]}></Img>
+                            <Img src={ImgBrand} maxW={["25%","14%"]}></Img>
                         </Heading>
                     </Box>
 

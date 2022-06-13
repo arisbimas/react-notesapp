@@ -17,7 +17,7 @@ export default function Contents() {
     const [noteBg, setNoteBg] = useState("brand.400");
     const toast = useToast();
     const [isOpenPelette, setOpenPelette] = useState(false);
-
+    const [isLoading, setLoading] = useState(false);
 
     let userID = localStorage.getItem("UserID");
 
@@ -33,6 +33,7 @@ export default function Contents() {
 
     const submit = (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             if (noteId) {
                 db.collection("DataNotes").doc(userID).collection("Notes").doc(noteId).update({
@@ -46,6 +47,7 @@ export default function Contents() {
                         setNoteDesc("");
                         setNoteId("");
                         setNoteBg("brand.400");
+                        setLoading(false);
                     })
                     .catch((error) => {
                         msgAlert('error', 'error', error);
@@ -62,6 +64,7 @@ export default function Contents() {
                         setNoteDesc("");
                         setNoteId("");
                         setNoteBg("brand.400");
+                        setLoading(false);
                     })
                     .catch((error) => {
                         msgAlert('error', 'error', error);
@@ -79,6 +82,7 @@ export default function Contents() {
         setNoteId(datas.id);
         setNoteTitle(newData.title);
         setNoteDesc(newData.note);
+        setNoteBg(newData.bg);
     }
 
     const openPalette = () => {
@@ -105,7 +109,7 @@ export default function Contents() {
     }
 
     const popover = {
-        position: 'absolute',
+        // position: 'absolute',
         zIndex: '2',
     }
     const cover = {
@@ -160,7 +164,7 @@ export default function Contents() {
                     borderBottomLeftRadius={'12px'}>
                     <Box>
                         <Tooltip hasArrow label='Save Note'>
-                            <Button colorScheme='brand' variant='outline' border={'1px dashed'} onClick={submit} mr={1}>
+                            <Button colorScheme='brand' variant='outline' border={'1px dashed'} onClick={submit} mr={1} disabled={isLoading}>
                                 Save
                             </Button>
                         </Tooltip>
@@ -179,7 +183,7 @@ export default function Contents() {
                             <Button colorScheme='brand' variant='outline' border={'1px dashed'} onClick={openPalette}>
                                 <FontAwesomeIcon icon={faPalette} />
                             </Button>
-                            {isOpenPelette ? <Box sx={popover}>
+                            {isOpenPelette ? <Box sx={popover} pos={{ sm: "relative", md: "absolute" }}>
                                 <Box sx={cover} onClick={closePalette} />
                                 <SketchPicker
                                     color={noteBg}
@@ -191,7 +195,7 @@ export default function Contents() {
                 </Box>
             </Box>
 
-            <ListNote onCounterChange={(value) => onGetDataById(value)} />
+            <ListNote onSelectNote={(value) => onGetDataById(value)} />
 
             {/* <CreateNote/>
                 <Spacer />
