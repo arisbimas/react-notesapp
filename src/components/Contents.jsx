@@ -6,6 +6,7 @@ import { SketchPicker, ChromePicker } from 'react-color';
 
 import db from "../services/firestore";
 import ListNote from './ListNote'
+import { addDoc, collection, doc, Timestamp, updateDoc } from 'firebase/firestore';
 
 
 export default function Contents() {
@@ -19,9 +20,13 @@ export default function Contents() {
     const [currentNoteId, setCurrentNoteId] = useState("");
     const [isOpenPelette, setOpenPelette] = useState(false);
     const [isLoading, setLoading] = useState(false);
+    const [userID, setUserID] = useState(localStorage.getItem("UserID"));
+
     const toast = useToast();
 
-    let userID = localStorage.getItem("UserID");
+    useEffect(() => {
+        setUserID(localStorage.getItem("UserID"));
+    }, [])
 
     const clearState = () => {
         setNoteData({ ...initState });
@@ -37,15 +42,17 @@ export default function Contents() {
         })
     }
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        try {
-            if (currentNoteId) {
-                db.collection("DataNotes").doc(userID).collection("Notes").doc(currentNoteId).update({
+        if (currentNoteId) {
+            try {
+                const reffUpdate = doc(db, 'DataNotes', userID, "Notes", currentNoteId);
+                await updateDoc(reffUpdate, {
                     title: noteData.title,
                     note: noteData.note,
-                    bg: noteData.bg
+                    bg: noteData.bg,
+                    created: Timestamp.now()
                 })
                     .then(() => {
                         msgAlert('success', 'Success', 'Data Saved');
@@ -55,25 +62,60 @@ export default function Contents() {
                     })
                     .catch((error) => {
                         msgAlert('error', 'error', error);
+                        setLoading(false);
                     })
-            } else {
-                db.collection("DataNotes").doc(userID).collection("Notes").add({
+            } catch (error) {
+                msgAlert('error', 'error', 'error');
+            }
+            // db.collection("DataNotes").doc(userID).collection("Notes").doc(currentNoteId).update({
+            //     title: noteData.title,
+            //     note: noteData.note,
+            //     bg: noteData.bg
+            // })
+            //     .then(() => {
+            //         msgAlert('success', 'Success', 'Data Saved');
+            //         clearState();
+            //         setCurrentNoteId("");
+            //         setLoading(false);
+            //     })
+            //     .catch((error) => {
+            //         msgAlert('error', 'error', error);
+            //     })
+        } else {
+            try {
+                await addDoc(collection(db, 'DataNotes', userID, "Notes"), {
                     title: noteData.title,
                     note: noteData.note,
-                    bg: noteData.bg
+                    bg: noteData.bg,
+                    created: Timestamp.now()
                 })
                     .then(() => {
                         msgAlert('success', 'Success', 'Data Saved');
                         setCurrentNoteId("");
-                        clearState(); 
+                        clearState();
                         setLoading(false);
                     })
                     .catch((error) => {
                         msgAlert('error', 'error', error);
+                        setLoading(false);
                     });
+            } catch (err) {
+                msgAlert('error', 'error', 'error');
             }
-        } catch (error) {
-            msgAlert('error', 'error', 'error');
+            // db.collection("DataNotes").doc(userID).collection("Notes").add({
+            //     title: noteData.title,
+            //     note: noteData.note,
+            //     bg: noteData.bg
+            // })
+            //     .then(() => {
+            //         msgAlert('success', 'Success', 'Data Saved');
+            //         setCurrentNoteId("");
+            //         clearState(); 
+            //         setLoading(false);
+            //     })
+            //     .catch((error) => {
+            //         msgAlert('error', 'error', error);
+            //     });
         }
 
     };
@@ -144,7 +186,7 @@ export default function Contents() {
                         //color="brand.400"
                         color="black"
                         placeholder='Title...'
-                        required="true"
+                        //required={"true"}
                         value={noteData.title}
                         onChange={(e) => setNoteData({ ...noteData, title: e.target.value })} />
 
@@ -157,7 +199,7 @@ export default function Contents() {
                         _focus={{ outline: 'none' }}
                         rows='10'
                         placeholder='Notes...'
-                        required="true"
+                        //required={"true"}
                         value={noteData.note}
                         onChange={(e) => setNoteData({ ...noteData, note: e.target.value })} />
                 </Box>
@@ -175,7 +217,7 @@ export default function Contents() {
                         </Tooltip>
                         <Tooltip hasArrow label='Cancel'>
                             <Button colorScheme='brand' variant='solid' border={'1px dashed'} onClick={() => {
-                                clearState(); 
+                                clearState();
                             }}>
                                 Cancel
                             </Button>

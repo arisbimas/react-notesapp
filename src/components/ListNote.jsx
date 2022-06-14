@@ -17,30 +17,49 @@ import ImgNoData from '../assets/nodata.svg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import db from "../services/firestore";
-import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, collection, query, orderBy, onSnapshot, deleteDoc } from "firebase/firestore"
 
 export default function ListNote({ onSelectNote }) {
 
     const [userNoteData, setUserNoteData] = useState([]);
     const [counter, setCounter] = useState(0);
     const [isLoading, setLoading] = useState(false);
+    //const [userID, setUserID] = useState("");
     const toast = useToast()
 
 
-    let userID = localStorage.getItem("UserID");
+    let userID = localStorage.getItem("UserID") || "";
     // const noteRef = doc(db, 'DataNotes', userID, "Notes");
 
+
     useEffect(() => {
+        let uID = localStorage.getItem("UserID");
         setLoading(true);
-        db.collection("DataNotes/" + userID + "/Notes").onSnapshot((snapshot) => {
-            setUserNoteData(
-                snapshot.docs.map((doc) => ({
+        if (uID) {
+            const q = query(collection(db, 'DataNotes', uID, "Notes"), orderBy('created', 'desc'))
+            onSnapshot(q, (querySnapshot) => {
+                setUserNoteData(querySnapshot.docs.map(doc => ({
                     id: doc.id,
-                    data: doc.data(),
-                }))
-            );
+                    data: doc.data()
+                })))
+                setLoading(false)
+            })
+        } else {
             setLoading(false)
-        });
+        }
+
+        //await getDoc(doc(db, 'DataNotes', uID, "Notes")).on
+        // alert(uID)
+        // db.collection("DataNotes/" + uID + "/Notes").onSnapshot((snapshot) => {
+        //     debugger
+        //     setUserNoteData(
+        //         snapshot.docs.map((doc) => ({
+        //             id: doc.id,
+        //             data: doc.data(),
+        //         }))
+        //     );
+        //     setLoading(false)
+        // });
         console.log({ userNoteData });
     }, []);
 
