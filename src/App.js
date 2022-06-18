@@ -4,6 +4,8 @@ import { Header } from "./components/Header";
 import Contents from './components/Contents';
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Routes, Route, Link } from "react-router-dom";
+import Login from './components/Login';
 
 
 export default class App extends Component {
@@ -20,8 +22,10 @@ export default class App extends Component {
   render() {
     return (
       <div className="App">
-        <Header></Header>
-        <Contents></Contents>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/home" element={<Contents />} />
+        </Routes>
       </div>
     );
   }
