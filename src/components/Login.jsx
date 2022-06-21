@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   auth,
   logInWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithGoogle,
   registerWithEmailAndPassword,
+  setUserDataLocal,
+  getUserByUID,
 } from "../services/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faAt,
   faHandcuffs,
   faUserNinja,
   faUserPen,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  Flex,
   Heading,
   Input,
   Button,
   InputGroup,
   Stack,
   InputLeftElement,
-  chakra,
   Box,
-  Avatar,
   FormControl,
   FormHelperText,
   InputRightElement,
@@ -36,16 +36,24 @@ import {
   TabPanels,
   TabPanel,
   Tab,
+  useToast,
+  useBoolean,
 } from "@chakra-ui/react";
 import ImgLogin from "../assets/login.svg";
-import { Formik } from "formik";
+import { connect } from "react-redux";
+
 // import "./Login.css";
-function Login() {
+function Login(props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [isLoading, setLoading] = useBoolean();
   const [user, loading, error] = useAuthState(auth);
+  const [showPassword, setShowPassword] = useState(false);
+  const handleShowPassword = () => setShowPassword(!showPassword);
+  const toast = useToast();
   const navigate = useNavigate();
+
   useEffect(() => {
     if (loading) {
       // maybe trigger a loading screen
@@ -54,24 +62,97 @@ function Login() {
     if (user) navigate("/home");
   }, [user, loading]);
 
+  useEffect(() => {
+    if (user) navigate("/home");
+  }, []);
+
   const register = () => {
     if (!name) {
       alert("Please enter name");
       return false;
     }
-    registerWithEmailAndPassword(name, email, password);
+    registerWithEmailAndPassword(name, email, password)
+      .then((res) => {
+        getUserByUID(res.uid)
+          .then((resUser) => {
+            debugger;
+            props.setUserData({
+              userData: resUser,
+            });
+            toast({
+              title: "Success Register",
+              description: resUser.code,
+              status: "success",
+              duration: 9000,
+              isClosable: true,
+            });
+            navigate("/home");
+          })
+          .finally(setLoading.off);
+      })
+      .catch((err) => {
+        toast({
+          title: "Error Register",
+          description: err.code,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      });
   };
-
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleShowPassword = () => setShowPassword(!showPassword);
 
   const handleLogin = (e) => {
     e.preventDefault();
-
-    logInWithEmailAndPassword(email, password);
+    setLoading.on();
+    signInWithEmailAndPassword(auth, email, password)
+      .then((res) => {
+        getUserByUID(res.user.uid)
+          .then((resUser) => {
+            debugger;
+            props.setUserData({
+              userData: resUser,
+            });
+            toast({
+              title: "Success Login",
+              description: resUser.code,
+              status: "success",
+              duration: 9000,
+              isClosable: true,
+            });
+            navigate("/home");
+          })
+          .finally(setLoading.off);
+      })
+      .catch((err) => {
+        toast({
+          title: "Error Login",
+          description: err.code,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      });
   };
 
+  const handleLoginGoogle = (e) => {
+    signInWithGoogle().then((result) => {
+      debugger;
+      if (result) {
+        setUserDataLocal(result.uid);
+        navigate("/home");
+      } else {
+        toast({
+          title: "Error Login",
+          description: result.code,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    });
+  };
+
+  console.log(props);
   return (
     <Box
       width="100%"
@@ -98,7 +179,7 @@ function Login() {
           {/* form */}
 
           <Tabs isFitted variant="enclosed">
-            <TabList mb="1em">
+            <TabList mb="1em" color={"gray.900"} fontFamily="Roboto">
               <Tab>Login</Tab>
               <Tab>Register</Tab>
             </TabList>
@@ -116,13 +197,13 @@ function Login() {
                     <InputGroup>
                       <InputLeftElement
                         pointerEvents="none"
-                        color="gray.900"
-                        children={<FontAwesomeIcon icon={faUserNinja} />}
+                        color="gray.100"
+                        children={<FontAwesomeIcon icon={faAt} />}
                       />
                       <Input
                         type="email"
-                        bgColor="#E8F0FE"
-                        color="gray.900"
+                        bgColor="gray.500"
+                        color="gray.100"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="E-mail Address"
@@ -133,13 +214,13 @@ function Login() {
                     <InputGroup>
                       <InputLeftElement
                         pointerEvents="none"
-                        color="gray.900"
+                        color="gray.100"
                         children={<FontAwesomeIcon icon={faHandcuffs} />}
                       />
                       <Input
                         type={showPassword ? "text" : "password"}
-                        bgColor="#E8F0FE"
-                        color="gray.900"
+                        bgColor="gray.500"
+                        color="gray.100"
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
                       />
@@ -161,14 +242,19 @@ function Login() {
                     borderRadius={0}
                     type="submit"
                     variant="solid"
-                    bgColor="brand.400"
+                    //bgColor="brand.400"
+                    colorScheme="brand"
                     width="full"
+                    isLoading={isLoading}
+                    loadingText="Loading..."
                     onClick={handleLogin}
                   >
                     Login
                   </Button>
                 </Stack>
               </TabPanel>
+
+              {/* Register section */}
               <TabPanel>
                 <Stack
                   spacing={4}
@@ -182,13 +268,13 @@ function Login() {
                     <InputGroup>
                       <InputLeftElement
                         pointerEvents="none"
-                        color="gray.900"
-                        children={<FontAwesomeIcon icon={faUserPen} />}
+                        color="gray.100"
+                        children={<FontAwesomeIcon icon={faUserNinja} />}
                       />
                       <Input
                         type="text"
-                        bgColor="#E8F0FE"
-                        color="gray.900"
+                        bgColor="gray.500"
+                        color="gray.100"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Full Name"
@@ -199,13 +285,13 @@ function Login() {
                     <InputGroup>
                       <InputLeftElement
                         pointerEvents="none"
-                        color="gray.900"
-                        children={<FontAwesomeIcon icon={faUserNinja} />}
+                        color="gray.100"
+                        children={<FontAwesomeIcon icon={faAt} />}
                       />
                       <Input
                         type="email"
-                        bgColor="#E8F0FE"
-                        color="gray.900"
+                        bgColor="gray.500"
+                        color="gray.100"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="E-mail Address"
@@ -216,13 +302,13 @@ function Login() {
                     <InputGroup>
                       <InputLeftElement
                         pointerEvents="none"
-                        color="gray.900"
+                        color="gray.100"
                         children={<FontAwesomeIcon icon={faHandcuffs} />}
                       />
                       <Input
                         type={showPassword ? "text" : "password"}
-                        bgColor="#E8F0FE"
-                        color="gray.900"
+                        bgColor="gray.500"
+                        color="gray.100"
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
                       />
@@ -244,7 +330,8 @@ function Login() {
                     borderRadius={0}
                     type="submit"
                     variant="solid"
-                    bgColor="brand.400"
+                    //bgColor="brand.400"
+                    colorScheme="brand"
                     width="full"
                     onClick={register}
                   >
@@ -297,7 +384,7 @@ function Login() {
                 fontSize="14px"
                 letterSpacing="0.2px"
                 fontFamily="Roboto"
-                onClick={signInWithGoogle}
+                onClick={handleLoginGoogle}
               >
                 Login with Google
               </Text>
@@ -318,4 +405,16 @@ function Login() {
   );
 }
 
-export default Login;
+const mapStateToProps = (state) => {
+  return {
+    userData: state.userData,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setUserData: (data) => dispatch({ type: "SET_USERDATA", data }),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

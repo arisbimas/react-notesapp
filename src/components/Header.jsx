@@ -26,13 +26,15 @@ import { logout, auth, db } from "../services/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { collection, query, where, getDoc, getDocs } from "firebase/firestore";
+import Login from "./Login";
+import { connect } from "react-redux";
 
 const styBtn = {
   bg: "none",
   _hover: "none",
 };
 
-export function Header() {
+function Header(props) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [user, loading, error] = useAuthState(auth);
   const [name, setName] = useState("");
@@ -40,17 +42,24 @@ export function Header() {
 
   const fetchUserName = async () => {
     try {
-      //   debugger;
+      debugger;
+      setName(props.userData.name);
+      // if (user) {
       //   const q = query(collection(db, "users"), where("uid", "==", user.uid));
       //   const doc = await getDocs(q);
       //   const data = doc.docs[0].data();
-      setName(user.email);
-      console.log(user);
-      localStorage.setItem("UserID", user.uid);
+      //   debugger;
+      //   if (data) {
+      //     setName(data.name);
+      //   }
+      // }
+
+      // console.log(user);
+
       //let currentUID = localStorage.getItem("UserID");
     } catch (err) {
       console.error(err);
-      alert("An error occured while fetching user data");
+      console.error("An error occured while fetching user data");
     }
   };
 
@@ -58,8 +67,13 @@ export function Header() {
     if (loading) return;
     if (!user) return navigate("/");
     fetchUserName();
-  }, [user, loading]);
+  }, [props, user, loading]);
 
+  // useEffect(() => {
+  //   fetchUserName();
+  // }, [user]);
+
+  console.log(props);
   return (
     <>
       <Box
@@ -108,23 +122,13 @@ export function Header() {
         </Flex>
       </Box>
     </>
-    // <div className="header">
-    //     <div className="header-content">
-    //         <Flex minWidth='max-content' alignItems='center' gap='2'>
-    //             <Box p='2'>
-    //                 <Heading as="a" href='#' size='md' fontFamily="Dancing Script" fontSize="3xl">Notes</Heading>
-    //             </Box>
-    //             <Spacer />
-    //             <ButtonGroup gap='2'>
-    //                 <LinkBox>Box</LinkBox>
-    //                 <Link>Link</Link>
-    //                 <LinkOverlay>Overlay</LinkOverlay>
-    //                 <EditIcon></EditIcon>
-    //                 <AttachmentIcon></AttachmentIcon>
-    //             </ButtonGroup>
-    //         </Flex>
-    //     </div>
-
-    // </div>
   );
 }
+
+const mapStateToProps = (state) => {
+  return {
+    userData: state.userData,
+  };
+};
+
+export default connect(mapStateToProps)(Header);

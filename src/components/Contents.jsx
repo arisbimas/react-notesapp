@@ -13,7 +13,7 @@ import {
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
-import { Header } from "./Header";
+import Header from "./Header";
 
 export default function Contents() {
   const initState = {

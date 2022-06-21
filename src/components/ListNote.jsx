@@ -68,7 +68,7 @@ export default function ListNote({ onSelectNote }) {
     //     );
     //     setLoading(false)
     // });
-    console.log({ userNoteData });
+    // console.log({ userNoteData });
   }, []);
 
   const handleDeleteNote = async (data) => {
