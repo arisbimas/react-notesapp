@@ -32,7 +32,6 @@ export default function ListNote({ onSelectNote }) {
   const [isLoading, setLoading] = useState(false);
   //const [userID, setUserID] = useState("");
   const toast = useToast();
-
   let userID = localStorage.getItem("UserID") || "";
   // const noteRef = doc(db, 'DataNotes', userID, "Notes");
 

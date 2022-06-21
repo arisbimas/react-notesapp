@@ -11,12 +11,12 @@ import Login from './components/Login';
 export default class App extends Component {
 
   componentDidMount() {
-    let currentUID = localStorage.getItem("UserID");
-    if (!currentUID) {
-      localStorage.setItem("UserID", uuidv4());
-    }
+    // let currentUID = localStorage.getItem("UserID");
+    // if (!currentUID) {
+    //   localStorage.setItem("UserID", uuidv4());
+    // }
 
-    localStorage.setItem("note-detail", "");
+    // localStorage.setItem("note-detail", "");
   }
 
   render() {

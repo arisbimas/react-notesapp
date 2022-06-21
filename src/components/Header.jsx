@@ -44,8 +44,10 @@ export function Header() {
       //   const q = query(collection(db, "users"), where("uid", "==", user.uid));
       //   const doc = await getDocs(q);
       //   const data = doc.docs[0].data();
-      setName(user.displayName);
-      //   console.log(data);
+      setName(user.email);
+      console.log(user);
+      localStorage.setItem("UserID", user.uid);
+      //let currentUID = localStorage.getItem("UserID");
     } catch (err) {
       console.error(err);
       alert("An error occured while fetching user data");
