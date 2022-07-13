@@ -8,10 +8,12 @@ import reportWebVitals from "./reportWebVitals";
 // 1. Import the extendTheme function
 import { extendTheme, ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter } from "react-router-dom";
-import { combineReducers, createStore } from "redux";
+import { combineReducers } from "redux";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./redux/globalReducer";
+import { throttle } from "lodash";
+import { loadState, saveState } from "./services/localStorage";
 
 // 2. Extend the theme to include custom colors, fonts, etc
 const colors = {
@@ -28,14 +30,39 @@ const colors = {
 };
 
 const theme = extendTheme({ colors });
-const rootCombineReducer = combineReducers({
-  rootReducer,
-});
+const persistedState = loadState();
+// {
+//   userDatas: {
+//     uid: null,
+//     email: null,
+//     name: null,
+//   },
+// };
+// const rootCombineReducer = combineReducers({
+//   rootReducer,
+// });
 //Store Redux
-const storeRedux = configureStore({ reducer: rootReducer });
+
+const storeRedux = configureStore({
+  reducer: rootReducer,
+  preloadedState: persistedState,
+});
+// console.log("subscribe ", storeReduxdetailNote.getState());
+
+//setiap kali panggil dispact, ini akan dijalankan
+//throttle=> memastikan hanya dijalakan sekali per time
+storeRedux.subscribe(
+  throttle(() => {
+    saveState({
+      // userDatas: storeRedux.getState().userDatas,
+      // bgNotes: storeRedux.getState().bgNotes,
+      detailNote: storeRedux.getState().detailNote,
+    });
+    console.log("subscribe ", storeRedux.getState());
+  }, 1000)
+);
 
 // 3. Pass the `theme` prop to the `ChakraProvider`
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

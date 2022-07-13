@@ -6,8 +6,6 @@ import {
   signInWithEmailAndPassword,
   signInWithGoogle,
   registerWithEmailAndPassword,
-  setUserDataLocal,
-  getUserByUID,
 } from "../services/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -41,7 +39,7 @@ import {
 } from "@chakra-ui/react";
 import ImgLogin from "../assets/login.svg";
 import { connect } from "react-redux";
-
+import { setUserDataLocal } from "../services/localStorage";
 // import "./Login.css";
 function Login(props) {
   const [email, setEmail] = useState("");
@@ -54,16 +52,27 @@ function Login(props) {
   const toast = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (loading) {
-      // maybe trigger a loading screen
-      return;
-    }
-    if (user) navigate("/home");
-  }, [user, loading]);
+  // useEffect(() => {
+  //   if (loading) {
+  //     // maybe trigger a loading screen
+  //     return;
+  //   }
+  //   if (user && props.userData.uid) navigate("/home");
+  // }, [user, loading]);
 
   useEffect(() => {
-    if (user) navigate("/home");
+    if (user) {
+      // setUserDataLocal(props.userData.uid);
+      navigate("/home");
+    } else {
+      // props.setUserData({
+      //   userData: {
+      //     uid: "",
+      //     email: "",
+      //     name: "",
+      //   },
+      // });
+    }
   }, []);
 
   const register = () => {
@@ -73,24 +82,18 @@ function Login(props) {
     }
     registerWithEmailAndPassword(name, email, password)
       .then((res) => {
-        getUserByUID(res.uid)
-          .then((resUser) => {
-            debugger;
-            props.setUserData({
-              userData: resUser,
-            });
-            toast({
-              title: "Success Register",
-              description: resUser.code,
-              status: "success",
-              duration: 9000,
-              isClosable: true,
-            });
-            navigate("/home");
-          })
-          .finally(setLoading.off);
+        toast({
+          title: "Success Register",
+          description: res.code,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+        setUserDataLocal(res.user);
+        navigate("/home");
       })
       .catch((err) => {
+        setLoading.off();
         toast({
           title: "Error Register",
           description: err.code,
@@ -98,7 +101,8 @@ function Login(props) {
           duration: 9000,
           isClosable: true,
         });
-      });
+      })
+      .finally(setLoading.off);
   };
 
   const handleLogin = (e) => {
@@ -106,24 +110,18 @@ function Login(props) {
     setLoading.on();
     signInWithEmailAndPassword(auth, email, password)
       .then((res) => {
-        getUserByUID(res.user.uid)
-          .then((resUser) => {
-            debugger;
-            props.setUserData({
-              userData: resUser,
-            });
-            toast({
-              title: "Success Login",
-              description: resUser.code,
-              status: "success",
-              duration: 9000,
-              isClosable: true,
-            });
-            navigate("/home");
-          })
-          .finally(setLoading.off);
+        toast({
+          title: "Success Login",
+          description: res.code,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+        setUserDataLocal(res.user);
+        navigate("/home");
       })
       .catch((err) => {
+        setLoading.off();
         toast({
           title: "Error Login",
           description: err.code,
@@ -131,19 +129,21 @@ function Login(props) {
           duration: 9000,
           isClosable: true,
         });
-      });
+      })
+      .finally(setLoading.off);
   };
 
   const handleLoginGoogle = (e) => {
     signInWithGoogle().then((result) => {
       debugger;
       if (result) {
-        setUserDataLocal(result.uid);
+        debugger;
+        setUserDataLocal(result);
         navigate("/home");
       } else {
         toast({
           title: "Error Login",
-          description: result.code,
+          description: result,
           status: "error",
           duration: 9000,
           isClosable: true,
@@ -152,7 +152,6 @@ function Login(props) {
     });
   };
 
-  console.log(props);
   return (
     <Box
       width="100%"
@@ -334,6 +333,8 @@ function Login(props) {
                     colorScheme="brand"
                     width="full"
                     onClick={register}
+                    isLoading={isLoading}
+                    loadingText="Loading..."
                   >
                     Register
                   </Button>
@@ -405,16 +406,16 @@ function Login(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userData: state.userData,
-  };
-};
+// const mapStateToProps = (state) => {
+//   return {
+//     userData: state.userData,
+//   };
+// };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    setUserData: (data) => dispatch({ type: "SET_USERDATA", data }),
-  };
-};
+// const mapDispatchToProps = (dispatch) => {
+//   return {
+//     setUserData: (data) => dispatch({ type: "SET_USERDATA", data }),
+//   };
+// };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;

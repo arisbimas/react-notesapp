@@ -1,18 +1,12 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Flex,
-  Spacer,
   Heading,
-  ButtonGroup,
   Button,
-  LinkBox,
-  Link,
-  LinkOverlay,
   Stack,
   useColorModeValue,
   useColorMode,
-  useDisclosure,
   Img,
   Avatar,
   Tag,
@@ -25,16 +19,18 @@ import ImgBrand from "../assets/imgbrand1.png";
 import { logout, auth, db } from "../services/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
-import { collection, query, where, getDoc, getDocs } from "firebase/firestore";
-import Login from "./Login";
+// import { collection, query, where, getDoc, getDocs } from "firebase/firestore";
+// import Login from "./Login";
 import { connect } from "react-redux";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { clearLS, getUserDataLocal } from "../services/localStorage";
 
 const styBtn = {
   bg: "none",
   _hover: "none",
 };
 
-function Header(props) {
+function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
   const [user, loading, error] = useAuthState(auth);
   const [name, setName] = useState("");
@@ -42,17 +38,20 @@ function Header(props) {
 
   const fetchUserName = async () => {
     try {
-      debugger;
-      setName(props.userData.name);
-      // if (user) {
-      //   const q = query(collection(db, "users"), where("uid", "==", user.uid));
-      //   const doc = await getDocs(q);
-      //   const data = doc.docs[0].data();
-      //   debugger;
-      //   if (data) {
-      //     setName(data.name);
-      //   }
-      // }
+      //debugger;
+      if (user) {
+        let u = getUserDataLocal();
+        setName(u.name);
+
+        //get name from server
+        // const q = query(collection(db, "users"), where("uid", "==", user.uid));
+        // const doc = await getDocs(q);
+        // const data = doc.docs[0].data();
+        // debugger;
+        // if (data) {
+        //   setName(data.name);
+        // }
+      }
 
       // console.log(user);
 
@@ -67,13 +66,20 @@ function Header(props) {
     if (loading) return;
     if (!user) return navigate("/");
     fetchUserName();
-  }, [props, user, loading]);
+  }, [user, loading]);
 
   // useEffect(() => {
   //   fetchUserName();
   // }, [user]);
 
-  console.log(props);
+  const handleLogout = async () => {
+    let out = await logout();
+    clearLS();
+  };
+
+  // console.log("render header");
+  // console.log(props.userData);
+
   return (
     <>
       <Box
@@ -106,7 +112,7 @@ function Header(props) {
                                 <AttachmentIcon></AttachmentIcon>
                             </Button> */}
 
-              <Button sx={styBtn} onClick={logout}>
+              <Button sx={styBtn} onClick={handleLogout}>
                 <FontAwesomeIcon icon={faRightFromBracket} />
               </Button>
               <Button onClick={toggleColorMode} sx={styBtn}>
@@ -125,10 +131,4 @@ function Header(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userData: state.userData,
-  };
-};
-
-export default connect(mapStateToProps)(Header);
+export default Header;

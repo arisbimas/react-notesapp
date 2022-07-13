@@ -9,14 +9,13 @@ import {
   Button,
   ScaleFade,
   useToast,
-  Stack,
   Skeleton,
   SimpleGrid,
 } from "@chakra-ui/react";
 import ImgNoData from "../assets/nodata.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { db } from "../services/firestore";
+import { auth, db } from "../services/firestore";
 import {
   doc,
   collection,
@@ -25,22 +24,26 @@ import {
   onSnapshot,
   deleteDoc,
 } from "firebase/firestore";
+import { getUserDataLocal } from "../services/localStorage";
+import { connect } from "react-redux";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-export default function ListNote({ onSelectNote }) {
+function ListNote(props) {
   const [userNoteData, setUserNoteData] = useState([]);
   const [counter, setCounter] = useState(0);
   const [isLoading, setLoading] = useState(false);
-  //const [userID, setUserID] = useState("");
+  const [userData, setUserData] = useState(getUserDataLocal());
+  const [user, loading, error] = useAuthState(auth);
   const toast = useToast();
-  let userID = localStorage.getItem("UserID") || "";
+  // let userID = localStorage.getItem("UserID") || "";
   // const noteRef = doc(db, 'DataNotes', userID, "Notes");
 
   useEffect(() => {
-    let uID = localStorage.getItem("UserID");
+    // let uID = localStorage.getItem("UserID");
     setLoading(true);
-    if (uID) {
+    if (userData && userData.uid) {
       const q = query(
-        collection(db, "DataNotes", uID, "Notes"),
+        collection(db, "DataNotes", userData.uid, "Notes"),
         orderBy("created", "desc")
       );
       onSnapshot(q, (querySnapshot) => {
@@ -53,26 +56,15 @@ export default function ListNote({ onSelectNote }) {
         setLoading(false);
       });
     } else {
+      if (user) {
+        console.log(user);
+      }
       setLoading(false);
     }
-
-    //await getDoc(doc(db, 'DataNotes', uID, "Notes")).on
-    // alert(uID)
-    // db.collection("DataNotes/" + uID + "/Notes").onSnapshot((snapshot) => {
-    //     debugger
-    //     setUserNoteData(
-    //         snapshot.docs.map((doc) => ({
-    //             id: doc.id,
-    //             data: doc.data(),
-    //         }))
-    //     );
-    //     setLoading(false)
-    // });
-    // console.log({ userNoteData });
   }, []);
 
   const handleDeleteNote = async (data) => {
-    await deleteDoc(doc(db, "DataNotes", userID, "Notes", data))
+    await deleteDoc(doc(db, "DataNotes", userData.uid, "Notes", data))
       .then(() => {
         msgAlert("success", "Success", "Data Deleted");
       })
@@ -139,6 +131,8 @@ export default function ListNote({ onSelectNote }) {
     // alignItems: "center",
   };
 
+  //console.log("render listnote");
+
   return (
     <Box
       w={{ md: "64%" }}
@@ -194,10 +188,16 @@ export default function ListNote({ onSelectNote }) {
                     <Box
                       onClick={() => {
                         let dataNoteDetail = userNoteData.filter(
-                          (x) => x.id == `${id}`
+                          (x) => x.id === `${id}`
                         );
+
                         if (dataNoteDetail.length >= 0) {
-                          onSelectNote(dataNoteDetail[0]);
+                          // onSelectNote(dataNoteDetail[0]);
+                          delete dataNoteDetail[0]["data"]["created"];
+                          delete dataNoteDetail[0]["data"]["updated"];
+                          debugger;
+                          props.setDetailNote(dataNoteDetail[0]);
+                          // props.setBgNotes(dataNoteDetail[0]["data"]["bg"]);
                         } else {
                         }
                       }}
@@ -230,3 +230,15 @@ export default function ListNote({ onSelectNote }) {
     </Box>
   );
 }
+const mapStateToProps = (state) => {
+  return {
+    detailNote: state.detailNote,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setDetailNote: (data) => dispatch({ type: "SET_DETAIL_NOTE", data }),
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(ListNote);

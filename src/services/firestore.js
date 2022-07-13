@@ -13,6 +13,7 @@ import { initializeApp } from "firebase/app";
 import {
   GoogleAuthProvider,
   getAuth,
+  updateProfile,
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -44,23 +45,28 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
-const setUserDataLocal = async (uid) => {
-  localStorage.setItem("UserID", uid);
-};
-
 const signInWithGoogle = async () => {
   try {
     const res = await signInWithPopup(auth, googleProvider);
     const user = res.user;
     const q = query(collection(db, "users"), where("uid", "==", user.uid));
     const docs = await getDocs(q);
+    debugger;
+
     if (docs.docs.length === 0) {
       await addDoc(collection(db, "users"), {
         uid: user.uid,
         name: user.displayName,
         authProvider: "google",
         email: user.email,
-      });
+      })
+        .then((r) => {
+          return user;
+        })
+        .catch((err) => {
+          //log error
+          console.log("success login w/ goggle but cant add new users");
+        });
     }
 
     return user;
@@ -81,6 +87,9 @@ const registerWithEmailAndPassword = async (name, email, password) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
+    if (user) {
+      const displayName = await updateProfileUser(name);
+    }
     const addDc = await addDoc(collection(db, "users"), {
       uid: user.uid,
       name,
@@ -103,15 +112,31 @@ const sendPasswordReset = async (email) => {
     alert(err.message);
   }
 };
-const logout = () => {
-  signOut(auth);
+const logout = async () => {
+  try {
+    await signOut(auth);
+    return true;
+  } catch (error) {
+    return false;
+  }
+  // console.log(out);
+  // debugger;
 };
 
 const getUserByUID = async (UID) => {
   const q = query(collection(db, "users"), where("uid", "==", UID));
   const doc = await getDocs(q);
+  debugger;
   const data = doc.docs[0].data();
   return data;
+};
+
+const updateProfileUser = async (displayName) => {
+  const updateName = await updateProfile(auth.currentUser, {
+    displayName: displayName,
+  });
+  debugger;
+  console.log("updateName", updateName);
 };
 
 export {
@@ -123,6 +148,5 @@ export {
   sendPasswordReset,
   logout,
   signInWithEmailAndPassword,
-  setUserDataLocal,
   getUserByUID,
 };
