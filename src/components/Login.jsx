@@ -86,7 +86,7 @@ function Login(props) {
           title: "Success Register",
           description: res.code,
           status: "success",
-          duration: 9000,
+          duration: 2000,
           isClosable: true,
         });
         setUserDataLocal(res.user);
@@ -98,7 +98,7 @@ function Login(props) {
           title: "Error Register",
           description: err.code,
           status: "error",
-          duration: 9000,
+          duration: 2000,
           isClosable: true,
         });
       })
@@ -114,7 +114,7 @@ function Login(props) {
           title: "Success Login",
           description: res.code,
           status: "success",
-          duration: 9000,
+          duration: 2000,
           isClosable: true,
         });
         setUserDataLocal(res.user);
@@ -126,7 +126,7 @@ function Login(props) {
           title: "Error Login",
           description: err.code,
           status: "error",
-          duration: 9000,
+          duration: 2000,
           isClosable: true,
         });
       })
@@ -145,7 +145,7 @@ function Login(props) {
           title: "Error Login",
           description: result,
           status: "error",
-          duration: 9000,
+          duration: 2000,
           isClosable: true,
         });
       }

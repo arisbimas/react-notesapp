@@ -18,7 +18,7 @@ export const saveState = (state) => {
 };
 
 export const setUserDataLocal = async (u) => {
-  debugger;
+  // debugger;
   // actual param
   // user={
   //   uid:,

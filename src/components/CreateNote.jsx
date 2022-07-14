@@ -55,8 +55,9 @@ function CreateNote(props) {
       title: msgTitle,
       description: msgDesc,
       status: status,
-      duration: 9000,
+      duration: 2000,
       isClosable: true,
+      position: "top-right",
     });
   };
 
@@ -94,7 +95,6 @@ function CreateNote(props) {
         msgAlert("error", "error", "error");
       }
     } else {
-      debugger;
       try {
         await addDoc(collection(db, "DataNotes", user.uid, "Notes"), {
           title: noteData.title,
@@ -152,7 +152,6 @@ function CreateNote(props) {
         bg: props.detailNote.data.bg,
       });
       setCurrentNoteId(props.detailNote.id);
-      debugger;
     }
 
     return () => {
@@ -274,7 +273,7 @@ function CreateNote(props) {
 }
 
 const mapStateToProps = (state) => {
-  debugger;
+  // debugger;
   return {
     detailNote: state.detailNote,
   };

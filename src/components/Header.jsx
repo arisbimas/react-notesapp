@@ -11,6 +11,7 @@ import {
   Avatar,
   Tag,
   TagLabel,
+  useToast,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,6 +36,19 @@ function Header() {
   const [user, loading, error] = useAuthState(auth);
   const [name, setName] = useState("");
   const navigate = useNavigate();
+  const toast = useToast();
+
+  const welcomeMsg = () => {
+    setTimeout(() => {
+      toast({
+        title: `Welcome Back, ${user.displayName}`,
+        description: `have a nice day!`,
+        status: "info",
+        duration: 4000,
+        isClosable: true,
+      });
+    }, 3000);
+  };
 
   const fetchUserName = async () => {
     try {
@@ -68,9 +82,11 @@ function Header() {
     fetchUserName();
   }, [user, loading]);
 
-  // useEffect(() => {
-  //   fetchUserName();
-  // }, [user]);
+  useEffect(() => {
+    if (name) {
+      welcomeMsg();
+    }
+  }, [name]);
 
   const handleLogout = async () => {
     let out = await logout();

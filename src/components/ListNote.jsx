@@ -170,7 +170,7 @@ function ListNote(props) {
                     sx={box}
                     w={["100%", "50%", "50%", "30%"]}
                     mt={["10px", "0px"]}
-                    bg={useColorModeValue(data.bg, data.bg)}
+                    bg={data.bg}
                     boxShadow={"xl"}
                     pos="relative"
                   >
