@@ -1,3 +1,7 @@
+![image](https://user-images.githubusercontent.com/35863218/178887256-2ba09f5f-bdec-486c-816a-0188393f6d35.png)
+
+
+
 # Getting Started with Create React App
 
 A simple Note app built using React, Chakra UI, Firebase Firestore and was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
