@@ -96,7 +96,7 @@ function Login(props) {
         setLoading.off();
         toast({
           title: "Error Register",
-          description: err.code,
+          description: err.message,
           status: "error",
           duration: 2000,
           isClosable: true,
